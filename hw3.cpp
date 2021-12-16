@@ -5,9 +5,7 @@
 #include <map>
 #include <sys/select.h>
 #include <sys/time.h>
-#include "user.h"
-#include "server.h"
-#include "database.h"
+#include "server.hpp"
 
 
 #define DEBUG 0

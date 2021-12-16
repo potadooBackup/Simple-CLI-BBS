@@ -1,5 +1,5 @@
-#ifndef COMMAND2ENUM_H
-#define COMMAND2ENUM_H
+#ifndef COMMAND2ENUM_HPP
+#define COMMAND2ENUM_HPP
 
 #include <iostream>
 using namespace std;

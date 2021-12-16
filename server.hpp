@@ -6,9 +6,9 @@
 #include <string>
 #include <cstring>
 #include <sstream>
-#include "database.h"
-#include "user.h"
-#include "command2Enum.h"
+#include "database.hpp"
+#include "user.hpp"
+#include "command2Enum.hpp"
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/shm.h>

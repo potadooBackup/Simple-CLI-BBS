@@ -1,5 +1,5 @@
-#ifndef DATABASE_H
-#define DATABASE_H
+#ifndef DATABASE_HPP
+#define DATABASE_HPP
 
 #include <iostream>
 #include <vector>
@@ -9,8 +9,8 @@
 #include <sys/shm.h>
 #include <sys/ipc.h>
 #include <algorithm>
-#include "user.h"
-#include "board.h"
+#include "user.hpp"
+#include "board.hpp"
 
 #define MAXMEMBERNUM 30
 

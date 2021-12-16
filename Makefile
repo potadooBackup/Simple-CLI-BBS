@@ -5,7 +5,7 @@ all : ../test/hw3
 
 OBJS = hw3.o user.o database.o server.o command2Enum.o
 
-HEADERS = user.h database.h server.h command2Enum.h board.h
+HEADERS = user.hpp database.hpp server.hpp command2Enum.hpp board.hpp
 
 CPPFILES = hw3.cpp user.cpp database.cpp server.cpp command2Enum.cpp
 

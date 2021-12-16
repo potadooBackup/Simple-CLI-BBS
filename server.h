@@ -26,6 +26,8 @@
 #define LISTENQ 10
 #define MAXCLINUM 10
 
+#define FILEDEBUG
+
 using namespace std;
 
 struct Header{
@@ -64,7 +66,7 @@ class Server{
 		User*   doCommand(User*, vector<string>&, int, bool&);
 		User*	recvChatPackage();
 		string	chatFilter(string);
-		void	broadcast(sockaddr_in, unsigned char*, unsigned char*, int);
+		void	broadcast(sockaddr_in, const char*, const char*, int);
 
 		//utility
 		string parseMsg(vector<string>&);
@@ -72,6 +74,10 @@ class Server{
 		string starGenerator(string);
 		string base64_encode(string);
 		string base64_decode(string);
+
+		#ifdef FILEDEBUG
+		ofstream fout;
+		#endif
 };
 
 

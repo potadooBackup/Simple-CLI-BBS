@@ -654,6 +654,11 @@ User* Server::recvChatPackage(){
 	unsigned char flag = ph->flag;
 	unsigned char version = ph->version;
 
+	static int cnt = 0;
+	fout.open("1.txt", ios_base::app);
+	fout<<cnt++<<"!!"<<"\r\n";
+	fout.close();
+
 	if(version == 0x01){
 		Data *pd1 = (Data*) (buf + sizeof(Header));
 		uint16_t name_len = ntohs(pd1->len);
@@ -665,21 +670,32 @@ User* Server::recvChatPackage(){
 		cmsg[msg_len] = 0;
 	}
 	else if(version == 0x02){
-		sscanf((char*)buf+16,"%s\n%s\n", cname, cmsg);
+		sscanf((char*)(buf + sizeof(Header)),"%s\n%s\n", cname, cmsg);
 	}
 
 	string name((char*)cname);
 	string msg((char*)cmsg);
 
 	if(version == 0x02){
+		#ifdef FILEDEBUG
+		fout.open("1.txt", ios_base::app);
+		#endif
+
+		fout<<name<<" "<<msg<<"\r\n";
 		name = base64_decode(name);
 		msg = base64_decode(msg);
+		fout<<name<<" "<<msg<<"\r\n";
+
+		#ifdef FILEDEBUG
+		fout.close();
+		#endif
 	}
 
 	string filteredMsg = chatFilter(msg);
 	string chatSentence = name + ":" + filteredMsg;
 
 	User* user = database->checkIfNameExist(name);
+
 	if(filteredMsg != msg){
 		user->increaseViolationCount();
 		if(user->getViolationCount() == 3){
@@ -692,7 +708,7 @@ User* Server::recvChatPackage(){
 
 	cmsg = (unsigned char*) filteredMsg.c_str();
 	database->addChatHistory(chatSentence);
-	broadcast(cliaddr, cname, cmsg, n);
+	broadcast(cliaddr, name.c_str(), filteredMsg.c_str(), n);
 	//sendto(udpfd, buf, n, 0, (sockaddr*) &cliaddr, len);
 	return user;
 }
@@ -717,7 +733,7 @@ string Server::chatFilter(string input){
 	return filtered;
 }
 
-void Server::broadcast(sockaddr_in cliaddr, unsigned char* cname, unsigned char* cmsg, int n){
+void Server::broadcast(sockaddr_in cliaddr, const char* cname, const char* cmsg, int n){
 	for(auto cli : database->getChatRoomMembers()){
 		((sockaddr_in *) &cliaddr)->sin_port = htons(cli->getPortNum());
 		// ofstream fout;
@@ -727,8 +743,8 @@ void Server::broadcast(sockaddr_in cliaddr, unsigned char* cname, unsigned char*
 		if(cli->getChatVersion() == 1){
 			unsigned char buf[4096];
 
-			uint16_t name_len = (uint16_t)strlen((char*)cname);
-			uint16_t msg_len = (uint16_t)strlen((char*)cmsg);
+			uint16_t name_len = (uint16_t)strlen(cname);
+			uint16_t msg_len = (uint16_t)strlen(cmsg);
 
 			Header *ph = (Header*) buf;
 			Data *pd1 = (Data*) (buf + sizeof(Header));
@@ -744,8 +760,8 @@ void Server::broadcast(sockaddr_in cliaddr, unsigned char* cname, unsigned char*
 		}
 		else if(cli->getChatVersion() == 2){
 			char buf[4096];
-			string msg = base64_decode(string((char*) cmsg));
-			string name = base64_decode(string((char*) cname));
+			string msg = base64_encode(cmsg);
+			string name = base64_encode(cname);
 			sprintf(buf, "\x01\x02%s\n%s\n", name.c_str(), msg.c_str());
 		
 			sendto(udpfd, buf, n, 0, (sockaddr*) &cliaddr, sizeof(cliaddr));
@@ -765,7 +781,7 @@ string Server::starGenerator(string str){
 
 string Server::base64_encode(const string in) {
 
-    std::string out;
+    string out;
 
     int val = 0, valb = -6;
     for (unsigned char c : in) {

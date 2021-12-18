@@ -210,7 +210,7 @@ void Database::removeChatRoomMember(User* user){
 	}
 }
 
-void Database::addblacklist(User* user){
+void Database::addToBlacklist(User* user){
 	blacklist.push_back(user->getName());
 }
 

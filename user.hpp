@@ -13,14 +13,15 @@ using namespace std;
 
 class User{
 	private:
-		string  	    name;
-		string		    passwd;
+		string  	    	name;
+		string		    	passwd;
 		pair<string,string> mailbox[MAXMAILNUM];
-		int 		    mailNum;
-		int				violationCount;
-		int				portNum;
-		int				chatVersion;
-		bool			isLogined;
+		int 		    	mailNum;
+		int					violationCount;
+		int					portNum;
+		int					chatVersion;
+		bool				isLogined;
+		
 	public:
 		//Constructor
 		User(string,string);

@@ -1,14 +1,12 @@
-#ifndef SERVER_H
-#define SERVER_H
+#ifndef SERVER_HPP
+#define SERVER_HPP
 
 #include <iostream>
 #include <vector>
 #include <string>
 #include <cstring>
 #include <sstream>
-#include "database.hpp"
-#include "user.hpp"
-#include "command2Enum.hpp"
+#include <fstream>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/shm.h>
@@ -19,7 +17,11 @@
 #include <unistd.h>
 #include <regex>
 
-#include <fstream>
+#include "database.hpp"
+#include "user.hpp"
+#include "command2Enum.hpp"
+
+
 
 
 #define MAXLINE 200
@@ -66,12 +68,11 @@ class Server{
 		User*   doCommand(User*, vector<string>&, int, bool&);
 		User*	recvChatPackage();
 		string	chatFilter(string);
-		void	broadcast(sockaddr_in, const char*, const char*, int);
+		void	broadcast(sockaddr_in, const char*, const char*);
 
 		//utility
 		string parseMsg(vector<string>&);
 		bool   isOpsLegal(Command, vector<string>&);
-		string starGenerator(string);
 		string base64_encode(string);
 		string base64_decode(string);
 

@@ -9,6 +9,7 @@
 #include <sys/shm.h>
 #include <sys/ipc.h>
 #include <algorithm>
+
 #include "user.hpp"
 #include "board.hpp"
 
@@ -58,7 +59,7 @@ class Database{
 		void		   addChatHistory(string);
 		void           addChatRoomMembers(User*, int, int);
 		void		   removeChatRoomMember(User*);
-		void		   addblacklist(User*);
+		void		   addToBlacklist(User*);
 };
 
 

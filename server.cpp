@@ -22,13 +22,11 @@ int Server::setupTCP(int port){
 	servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
 	servaddr.sin_port	 = htons(port);
 
+	int enable = 1;
+	setsockopt(listenfd, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(int));
 	bind(listenfd, (sockaddr*) &servaddr, sizeof(servaddr));
 
 	listen(listenfd, LISTENQ);
-
-	int enable = 1;
-	setsockopt(listenfd, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(int));
-	//setsockopt(listenfd, SOL_SOCKET, SO_REUSEPORT, &enable, sizeof(int));
 
 	return listenfd;
 }
@@ -41,19 +39,16 @@ int Server::setupUDP(int port){
 	servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
 	servaddr.sin_port	 = htons(port);
 
-	bind(udpfd, (sockaddr*) &servaddr, sizeof(servaddr));
-
 	int enable = 1;
 	setsockopt(udpfd, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(int));
-	//setsockopt(udpfd, SOL_SOCKET, SO_REUSEPORT, &enable, sizeof(int));
+	bind(udpfd, (sockaddr*) &servaddr, sizeof(servaddr));
+
+	
 	return udpfd;
 }
 
 int Server::acceptConnection(){
 	int connfd = accept(this->listenfd, (sockaddr*) NULL, NULL);
-	int enable = 1;
-	setsockopt(connfd, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(int));
-	//setsockopt(connfd, SOL_SOCKET, SO_REUSEPORT, &enable, sizeof(int));
 	cout<<"Connection Acceptted!"<<endl;
 	return connfd;
 }
@@ -654,11 +649,6 @@ User* Server::recvChatPackage(){
 	unsigned char flag = ph->flag;
 	unsigned char version = ph->version;
 
-	static int cnt = 0;
-	fout.open("1.txt", ios_base::app);
-	fout<<cnt++<<"!!"<<"\r\n";
-	fout.close();
-
 	if(version == 0x01){
 		Data *pd1 = (Data*) (buf + sizeof(Header));
 		uint16_t name_len = ntohs(pd1->len);
@@ -677,18 +667,8 @@ User* Server::recvChatPackage(){
 	string msg((char*)cmsg);
 
 	if(version == 0x02){
-		#ifdef FILEDEBUG
-		fout.open("1.txt", ios_base::app);
-		#endif
-
-		fout<<name<<" "<<msg<<"\r\n";
 		name = base64_decode(name);
 		msg = base64_decode(msg);
-		fout<<name<<" "<<msg<<"\r\n";
-
-		#ifdef FILEDEBUG
-		fout.close();
-		#endif
 	}
 
 	string filteredMsg = chatFilter(msg);
@@ -701,15 +681,14 @@ User* Server::recvChatPackage(){
 		if(user->getViolationCount() == 3){
 			//logout
 			database->removeChatRoomMember(user);
-			database->addblacklist(user);
-		}
-		else user = nullptr;
-	}else user = nullptr;
+			database->addToBlacklist(user);
+		} else user = nullptr;
+	} else user = nullptr;
 
 	cmsg = (unsigned char*) filteredMsg.c_str();
 	database->addChatHistory(chatSentence);
-	broadcast(cliaddr, name.c_str(), filteredMsg.c_str(), n);
-	//sendto(udpfd, buf, n, 0, (sockaddr*) &cliaddr, len);
+	broadcast(cliaddr, name.c_str(), filteredMsg.c_str());
+
 	return user;
 }
 
@@ -733,13 +712,9 @@ string Server::chatFilter(string input){
 	return filtered;
 }
 
-void Server::broadcast(sockaddr_in cliaddr, const char* cname, const char* cmsg, int n){
+void Server::broadcast(sockaddr_in cliaddr, const char* cname, const char* cmsg){
 	for(auto cli : database->getChatRoomMembers()){
 		((sockaddr_in *) &cliaddr)->sin_port = htons(cli->getPortNum());
-		// ofstream fout;
-		// fout.open("1.txt");
-		// fout<< cli->getPortNum() << endl;
-		// fout.close();
 		if(cli->getChatVersion() == 1){
 			unsigned char buf[4096];
 
@@ -755,6 +730,8 @@ void Server::broadcast(sockaddr_in cliaddr, const char* cname, const char* cmsg,
 			memcpy(pd1->data, cname, name_len);
 			pd2->len = htons(msg_len);
 			memcpy(pd2->data, cmsg, msg_len);
+			
+			int n = sizeof(Header) + sizeof(Data) + name_len + sizeof(Data) + msg_len;
 
 			sendto(udpfd, buf, n, 0, (sockaddr*) &cliaddr, sizeof(cliaddr));
 		}
@@ -763,20 +740,13 @@ void Server::broadcast(sockaddr_in cliaddr, const char* cname, const char* cmsg,
 			string msg = base64_encode(cmsg);
 			string name = base64_encode(cname);
 			sprintf(buf, "\x01\x02%s\n%s\n", name.c_str(), msg.c_str());
-		
+
+			int n = strlen((char*)buf);
+
 			sendto(udpfd, buf, n, 0, (sockaddr*) &cliaddr, sizeof(cliaddr));
 		}
 	}
 	
-}
-
-string Server::starGenerator(string str){
-	int n = str.size();
-	string stars("");
-	for(int i=0; i<n; i++){
-		stars+="*";
-	}
-	return stars;
 }
 
 string Server::base64_encode(const string in) {
@@ -798,7 +768,7 @@ string Server::base64_encode(const string in) {
 }
 
 string Server::base64_decode(const string in) {
-
+	
     string out;
 
     vector<int> T(256,-1);

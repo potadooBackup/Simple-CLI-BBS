@@ -561,6 +561,23 @@ User* Server::doCommand(User* user, vector<string>& ops, int connfd, bool &isExi
 					send(connfd, msgBuff.c_str(), msgBuff.size(), 0);
 					break;
 				}
+				auto isDigitString = [](const string& str){
+					for(char const &c : str) if(isdigit(c) == 0) return false;
+					return true;
+				};
+
+				if(!isDigitString(ops[1])){
+					msgBuff = "Port "+ ops[1] + " is not valid.\n";
+					send(connfd, msgBuff.c_str(), msgBuff.size(), 0);
+					break;
+				}
+
+				if(!isDigitString(ops[2])){
+					msgBuff = "Version " + ops[2] + " is not supported.\n";
+					send(connfd, msgBuff.c_str(), msgBuff.size(), 0);
+					break;
+				}
+
 				int portNum;
 				int version;
 				stringstream ss("");
@@ -648,6 +665,8 @@ User* Server::recvChatPackage(){
 	Header *ph = (Header*) buf;
 	unsigned char flag = ph->flag;
 	unsigned char version = ph->version;
+
+	if(flag != 0x01) return nullptr;
 
 	if(version == 0x01){
 		Data *pd1 = (Data*) (buf + sizeof(Header));

@@ -10,7 +10,7 @@ g++ 14
 
 ## Program Structure  
 
-![image](https://github.com/potadooweii/Simple-CLI-BBS/tree/master/imgs)
+![image](https://github.com/potadooweii/Simple-CLI-BBS/blob/master/imgs/structure%231.png)
 
 ## Features
 All exceptions are handled.

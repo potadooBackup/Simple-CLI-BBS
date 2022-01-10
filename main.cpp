@@ -6,7 +6,7 @@
 #include <sys/select.h>
 #include <sys/time.h>
 
-#include "server.hpp"
+#include "header/server.hpp"
 
 
 #define DEBUG 0
@@ -66,11 +66,6 @@ int main(int argc, char* argv[]){
 						server->doCommand(user, tmp, userHashInv[user], noUse);
 						server->sendCmlPrompt(userHashInv[user]);
 					}
-					//receive chat
-						//1. parse the package
-						//2. deal with word filter
-						//3. broadcast
-						//4. sendcmlprompt 
 				}
 				else{
 					int recvlen = 0;

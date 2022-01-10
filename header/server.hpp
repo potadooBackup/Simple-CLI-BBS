@@ -21,9 +21,6 @@
 #include "user.hpp"
 #include "command2Enum.hpp"
 
-
-
-
 #define MAXLINE 200
 #define LISTENQ 10
 #define MAXCLINUM 10

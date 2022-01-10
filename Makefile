@@ -1,15 +1,15 @@
 CC = g++
 
 .PHONY: all
-all : ../test/hw3
+all : main
 
-OBJS = hw3.o user.o database.o server.o command2Enum.o
+OBJS = main.o user.o database.o server.o command2Enum.o
 
-HEADERS = user.hpp database.hpp server.hpp command2Enum.hpp board.hpp
+HEADERS = ./header/user.hpp ./header/database.hpp ./header/server.hpp ./header/command2Enum.hpp ./header/board.hpp
 
-CPPFILES = hw3.cpp user.cpp database.cpp server.cpp command2Enum.cpp
+CPPFILES = main.cpp ./src/user.cpp ./src/database.cpp ./src/server.cpp ./src/command2Enum.cpp
 
-../test/hw3: $(OBJS)
+main: $(OBJS)
 	$(CC) -o $@ $^
 
 $(OBJS): $(CPPFILES) $(HEADERS)
@@ -17,4 +17,4 @@ $(OBJS): $(CPPFILES) $(HEADERS)
 
 .PHONY: clean
 clean:
-	rm -rf *.o *.gch hw3
+	rm -rf *.o *.gch main

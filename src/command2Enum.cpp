@@ -1,4 +1,4 @@
-#include "command2Enum.hpp"
+#include "../header/command2Enum.hpp"
 
 Command command2enum(string cmd){
 	if (cmd == "register") return REGISTER;

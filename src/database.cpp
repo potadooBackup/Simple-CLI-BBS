@@ -1,4 +1,4 @@
-#include "database.hpp"
+#include "../header/database.hpp"
 
 Database::Database(){
 	memberNum = 0;
